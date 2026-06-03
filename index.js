@@ -1,4 +1,5 @@
 /**
+ * Modern TypedArray
  * @module modern-typedarray
  */
 
@@ -430,20 +431,114 @@ export class TypedArrayStream {
   }
 }
 
+// FIXED SIMDVector Class
 export class SIMDVector {
-  constructor(data, type = 'f32') { this.data = data; this.type = type; }
-  static isSIMDSupported() { return typeof WebAssembly !== 'undefined' && WebAssembly.validate(new Uint8Array([0x00, 0x61, 0x73, 0x6d])); }
+  constructor(data, type = 'f32') { 
+    this.data = data; 
+    this.type = type; 
+  }
+  
+  static isSIMDSupported() { 
+    return typeof WebAssembly !== 'undefined' && WebAssembly.validate(new Uint8Array([0x00, 0x61, 0x73, 0x6d])); 
+  }
+  
   add(other) {
+    // Handle different input types
+    let otherData;
+    if (other instanceof SIMDVector) {
+      otherData = other.data;
+    } else if (other.buffer instanceof ArrayBuffer) {
+      otherData = other;
+    } else if (Array.isArray(other)) {
+      otherData = new this.data.constructor(other);
+    } else {
+      otherData = other;
+    }
+    
     const result = new this.data.constructor(this.data.length);
-    for (let i = 0; i < this.data.length; i++) result[i] = this.data[i] + other[i];
+    for (let i = 0; i < this.data.length; i++) {
+      const val1 = this.data[i];
+      const val2 = otherData[i];
+      // Handle BigInt vs Number
+      if (typeof val1 === 'bigint' || typeof val2 === 'bigint') {
+        result[i] = BigInt(val1) + BigInt(val2);
+      } else {
+        result[i] = val1 + val2;
+      }
+    }
     return new SIMDVector(result, this.type);
   }
+  
   multiply(other) {
+    // Handle different input types
+    let otherData;
+    let isScalar = typeof other === 'number' || typeof other === 'bigint';
+    
+    if (isScalar) {
+      const scalar = other;
+      const result = new this.data.constructor(this.data.length);
+      for (let i = 0; i < this.data.length; i++) {
+        if (typeof this.data[i] === 'bigint' || typeof scalar === 'bigint') {
+          result[i] = BigInt(this.data[i]) * BigInt(scalar);
+        } else {
+          result[i] = this.data[i] * scalar;
+        }
+      }
+      return new SIMDVector(result, this.type);
+    }
+    
+    if (other instanceof SIMDVector) {
+      otherData = other.data;
+    } else if (other.buffer instanceof ArrayBuffer) {
+      otherData = other;
+    } else if (Array.isArray(other)) {
+      otherData = new this.data.constructor(other);
+    } else {
+      otherData = other;
+    }
+    
     const result = new this.data.constructor(this.data.length);
-    for (let i = 0; i < this.data.length; i++) result[i] = this.data[i] * (typeof other === 'number' ? other : other[i]);
+    for (let i = 0; i < this.data.length; i++) {
+      const val1 = this.data[i];
+      const val2 = otherData[i];
+      if (typeof val1 === 'bigint' || typeof val2 === 'bigint') {
+        result[i] = BigInt(val1) * BigInt(val2);
+      } else {
+        result[i] = val1 * val2;
+      }
+    }
     return new SIMDVector(result, this.type);
   }
-  dot(other) { let sum = 0; for (let i = 0; i < this.data.length; i++) sum += this.data[i] * other[i]; return sum; }
+  
+  dot(other) {
+    let otherData;
+    if (other instanceof SIMDVector) {
+      otherData = other.data;
+    } else if (other.buffer instanceof ArrayBuffer) {
+      otherData = other;
+    } else if (Array.isArray(other)) {
+      otherData = new this.data.constructor(other);
+    } else {
+      otherData = other;
+    }
+    
+    let sum = 0;
+    let sumBigInt = 0n;
+    let isBigInt = false;
+    
+    for (let i = 0; i < this.data.length; i++) {
+      const val1 = this.data[i];
+      const val2 = otherData[i];
+      if (typeof val1 === 'bigint' || typeof val2 === 'bigint') {
+        isBigInt = true;
+        sumBigInt += BigInt(val1) * BigInt(val2);
+      } else {
+        sum += val1 * val2;
+      }
+    }
+    
+    return isBigInt ? sumBigInt : sum;
+  }
 }
 
 export class TypedArrayPool {
