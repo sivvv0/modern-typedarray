@@ -1,5 +1,4 @@
 /**
- * Modern TypedArray Polyfill - Complete Edition
  * @module modern-typedarray
  */
 
