@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'package.json'
   release:
     types: [created]
   workflow_dispatch:
@@ -25,23 +23,15 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean install with npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --no-package-lock
       
       - name: Run tests
         run: npm test
-      
-      - name: Build
-        run: npm run build
       
       - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
-      - name: Create Release Tag
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          git tag v$VERSION
-          git push origin v$VERSION
