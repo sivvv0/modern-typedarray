@@ -283,6 +283,103 @@ export class DataViewPolyfill {
   setInt8(offset, value) { new Uint8Array(this._buffer)[this._byteOffset + offset] = value; }
   getUint8(offset) { return new Uint8Array(this._buffer)[this._byteOffset + offset]; }
   setUint8(offset, value) { new Uint8Array(this._buffer)[this._byteOffset + offset] = value; }
+  getInt16(offset, littleEndian) { 
+    const arr = new Uint8Array(this._buffer);
+    const a = arr[this._byteOffset + offset];
+    const b = arr[this._byteOffset + offset + 1];
+    if (littleEndian) return a | (b << 8);
+    return (a << 8) | b;
+  }
+  setInt16(offset, value, littleEndian) {
+    const arr = new Uint8Array(this._buffer);
+    if (littleEndian) {
+      arr[this._byteOffset + offset] = value & 0xFF;
+      arr[this._byteOffset + offset + 1] = (value >> 8) & 0xFF;
+    } else {
+      arr[this._byteOffset + offset] = (value >> 8) & 0xFF;
+      arr[this._byteOffset + offset + 1] = value & 0xFF;
+    }
+  }
+  getUint16(offset, littleEndian) { return this.getInt16(offset, littleEndian) >>> 0; }
+  setUint16(offset, value, littleEndian) { this.setInt16(offset, value, littleEndian); }
+  getInt32(offset, littleEndian) {
+    const arr = new Uint8Array(this._buffer);
+    const a = arr[this._byteOffset + offset];
+    const b = arr[this._byteOffset + offset + 1];
+    const c = arr[this._byteOffset + offset + 2];
+    const d = arr[this._byteOffset + offset + 3];
+    if (littleEndian) return a | (b << 8) | (c << 16) | (d << 24);
+    return (a << 24) | (b << 16) | (c << 8) | d;
+  }
+  setInt32(offset, value, littleEndian) {
+    const arr = new Uint8Array(this._buffer);
+    if (littleEndian) {
+      arr[this._byteOffset + offset] = value & 0xFF;
+      arr[this._byteOffset + offset + 1] = (value >> 8) & 0xFF;
+      arr[this._byteOffset + offset + 2] = (value >> 16) & 0xFF;
+      arr[this._byteOffset + offset + 3] = (value >> 24) & 0xFF;
+    } else {
+      arr[this._byteOffset + offset] = (value >> 24) & 0xFF;
+      arr[this._byteOffset + offset + 1] = (value >> 16) & 0xFF;
+      arr[this._byteOffset + offset + 2] = (value >> 8) & 0xFF;
+      arr[this._byteOffset + offset + 3] = value & 0xFF;
+    }
+  }
+  getUint32(offset, littleEndian) { return this.getInt32(offset, littleEndian) >>> 0; }
+  setUint32(offset, value, littleEndian) { this.setInt32(offset, value, littleEndian); }
+  getFloat32(offset, littleEndian) {
+    const intVal = this.getInt32(offset, littleEndian);
+    const buffer = new ArrayBuffer(4);
+    new DataView(buffer).setInt32(0, intVal, true);
+    return new Float32Array(buffer)[0];
+  }
+  setFloat32(offset, value, littleEndian) {
+    const buffer = new ArrayBuffer(4);
+    new Float32Array(buffer)[0] = value;
+    const intVal = new DataView(buffer).getInt32(0, true);
+    this.setInt32(offset, intVal, littleEndian);
+  }
+  getFloat64(offset, littleEndian) {
+    const arr = new Uint8Array(this._buffer);
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    for (let i = 0; i < 8; i++) {
+      view.setUint8(i, arr[this._byteOffset + offset + (littleEndian ? i : 7 - i)], true);
+    }
+    return view.getFloat64(0, true);
+  }
+  setFloat64(offset, value, littleEndian) {
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    view.setFloat64(0, value, true);
+    const arr = new Uint8Array(this._buffer);
+    for (let i = 0; i < 8; i++) {
+      arr[this._byteOffset + offset + (littleEndian ? i : 7 - i)] = view.getUint8(i);
+    }
+  }
+  getBigInt64(offset, littleEndian) {
+    const high = this.getUint32(offset + (littleEndian ? 4 : 0), littleEndian);
+    const low = this.getUint32(offset + (littleEndian ? 0 : 4), littleEndian);
+    return (BigInt(high) << 32n) | BigInt(low);
+  }
+  setBigInt64(offset, value, littleEndian) {
+    const high = Number((value >> 32n) & 0xFFFFFFFFn);
+    const low = Number(value & 0xFFFFFFFFn);
+    if (littleEndian) {
+      this.setUint32(offset, low, true);
+      this.setUint32(offset + 4, high, true);
+    } else {
+      this.setUint32(offset, high, false);
+      this.setUint32(offset + 4, low, false);
+    }
+  }
+  getBigUint64(offset, littleEndian) {
+    const val = this.getBigInt64(offset, littleEndian);
+    return val >= 0 ? val : val + 0x10000000000000000n;
+  }
+  setBigUint64(offset, value, littleEndian) {
+    this.setBigInt64(offset, BigInt(value), littleEndian);
+  }
 }
 
 // ============ SMART EXPORTS (Auto-detect native) ============
@@ -395,13 +492,28 @@ export const Endianess = {
   }
 };
 
+// Fixed SecureRandom - no top-level await
+let nodeCrypto = null;
+if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+  try {
+    const crypto = await import('crypto');
+    nodeCrypto = crypto;
+  } catch (e) {
+    // Crypto not available
+  }
+}
+
 export const SecureRandom = {
   fill(array) {
-    if (globalThis.crypto && crypto.getRandomValues) crypto.getRandomValues(array);
-    else if (globalThis.process?.versions?.node) {
-      const { randomBytes } = await import('crypto');
-      const bytes = randomBytes(array.byteLength);
+    if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+      globalThis.crypto.getRandomValues(array);
+    } else if (nodeCrypto) {
+      const bytes = nodeCrypto.randomBytes(array.byteLength);
       array.set(new Uint8Array(bytes));
+    } else {
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
     }
     return array;
   },
@@ -413,7 +525,7 @@ export function observable(array, callback) {
     set(target, prop, value) {
       const oldValue = target[prop];
       const result = Reflect.set(target, prop, value);
-      if (oldValue !== value) callback(prop, oldValue, value, target);
+      if (oldValue !== value && typeof callback === 'function') callback(prop, oldValue, value, target);
       return result;
     }
   });
@@ -454,6 +566,20 @@ export const FastCompression = {
   }
 };
 
+export const GPUInterop = {
+  toWebGLTexture(gl, array, width, height, format = gl.RGBA) {
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.UNSIGNED_BYTE, array);
+    return texture;
+  },
+  fromWebGLFramebuffer(gl, width, height, format = gl.RGBA) {
+    const pixels = new Uint8Array(width * height * 4);
+    gl.readPixels(0, 0, width, height, format, gl.UNSIGNED_BYTE, pixels);
+    return pixels;
+  }
+};
+
 export function concat(arrays, TypedArrayType = Uint8Array) {
   let totalLength = 0;
   for (const arr of arrays) totalLength += arr.length;
@@ -474,4 +600,15 @@ export function isSupported(type) {
   };
   const ctor = types[type];
   return ctor && ctor !== globalThis[type] ? 'polyfilled' : 'native';
+}
+
+export function getMemoryStats() {
+  if (typeof performance !== 'undefined' && performance.memory) {
+    return {
+      jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+      totalJSHeapSize: performance.memory.totalJSHeapSize,
+      usedJSHeapSize: performance.memory.usedJSHeapSize
+    };
+  }
+  return null;
 }
