@@ -1,0 +1,49 @@
+{
+  "name": "modern-typedarray",
+  "version": "0.0.1",
+  "description": "🚀 Future-proof TypedArray with ES2024, WASM SIMD, streaming, and advanced utilities",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs",
+      "types": "./index.d.ts"
+    }
+  },
+  "types": "index.d.ts",
+  "files": [
+    "*.js",
+    "*.cjs",
+    "*.d.ts"
+  ],
+  "scripts": {
+    "test": "node --test test.js",
+    "benchmark": "node benchmark.js"
+  },
+  "keywords": [
+    "typedarray",
+    "polyfill",
+    "es2024",
+    "wasm",
+    "simd",
+    "streaming",
+    "compression",
+    "crypto",
+    "gpu",
+    "performance",
+    "arraybuffer",
+    "dataview",
+    "bigint64array"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sivvv0/modern-typedarray.git"
+  }
+}
