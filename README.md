@@ -529,29 +529,43 @@ npm run benchmark
 
 📊 Comparison: Original vs Modern
 
-Feature Original typedarray Modern TypedArray
-Module format CommonJS only ESM + CommonJS
-Auto-detection ❌ Always polyfills ✅ Uses native when available
-TypeScript support ❌ None ✅ Full .d.ts
-BigInt64Array ❌ No ✅ Yes (ES2020)
-ES2024 methods ❌ No ✅ toReversed, toSorted, etc.
-Memory pool ❌ No ✅ Yes
-SIMD operations ❌ No ✅ Yes
-Compression ❌ No ✅ Yes
-Crypto random ❌ No ✅ Yes
-Observable arrays ❌ No ✅ Yes
-Streaming ❌ No ✅ Yes
-WASM integration ❌ No ✅ Yes
-GPU interop ❌ No ✅ Yes
-Bundle size (gzipped) ~8KB ~3KB (modern browsers)
+## 🚀 Comparison
 
-🤝 Contributing
+| Feature | Modern TypedArray Toolkit | Legacy TypedArray Module |
+|----------|--------------------------|--------------------------|
+| Module Format | ✅ ESM + CommonJS | ⚠️ CommonJS Only |
+| Auto-Detection | ✅ Uses Native APIs When Available | ❌ Always Polyfills |
+| TypeScript Support | ✅ Full `.d.ts` Support | ❌ None |
+| BigInt64Array Support | ✅ Yes (ES2020+) | ❌ No |
+| ES2024 Methods | ✅ `toReversed()`, `toSorted()`, `toSpliced()`, `with()` | ❌ No |
+| Memory Pool | ✅ Built-in | ❌ No |
+| SIMD Operations | ✅ Supported | ❌ No |
+| Compression Utilities | ✅ Included | ❌ No |
+| Crypto Random Generation | ✅ Included | ❌ No |
+| Observable Arrays | ✅ Included | ❌ No |
+| Streaming Support | ✅ Included | ❌ No |
+| WebAssembly Integration | ✅ Included | ❌ No |
+| GPU Interoperability | ✅ Included | ❌ No |
+| Bundle Size (Gzipped) | ✅ ~3 KB (Modern Browsers) | ⚠️ ~8 KB |
 
-Contributions welcome! Please read our contributing guidelines.
+---
+
+### ✨ Why Choose Modern TypedArray Toolkit?
+
+- 🚀 Built for modern JavaScript runtimes
+- 📦 Tree-shakeable ESM architecture
+- 🔥 Native-first performance strategy
+- 🛡️ Fully typed with TypeScript
+- ⚡ SIMD, WASM, GPU, and streaming ready
+- 🌐 Works in Node.js, Bun, Deno, Browsers, and Edge runtimes
+- 🔮 Future-proof ES2024+ API support
+
+> Designed for high-performance applications, data processing pipelines, machine learning workloads, real-time streaming, and next-generation web platforms.
+
 
 📄 License
 
-MIT © [Your Name]
+MIT © s1vann
 
 🙏 Acknowledgments
 
@@ -559,11 +573,6 @@ MIT © [Your Name]
 · ES-Shims team for maintaining standards
 · WebAssembly SIMD working group
 
-🔗 Links
-
-· GitHub Repository
-· npm Package
-· Issue Tracker
 
 ---
 
