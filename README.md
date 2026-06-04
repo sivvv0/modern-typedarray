@@ -54,7 +54,7 @@ require is not defined
 **Check quickly**
 
 - Open Safari/Chrome DevTools and see the exact error.
-- Or use [Our Debugging Website](https://debug-modern-typedarray.netlify.app
+- Or use [![Our Debugging Website](https://debug-modern-typedarray.netlify.app
 ```html
 <script type="module">
 import * as ModernTypedArray from 'https://unpkg.com/modern-typedarray@latest/index.js';
