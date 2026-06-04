@@ -1,6 +1,6 @@
 {
   "name": "modern-typedarray",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "🚀 Future-proof TypedArray with ES2024, WASM SIMD, streaming, and advanced utilities",
   "type": "module",
   "main": "index.js",
