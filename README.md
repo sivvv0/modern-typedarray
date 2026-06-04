@@ -55,7 +55,7 @@ require is not defined
 - 
 ```html
 <script type="module">
-import * as ModernTypedArray from 'https://unpkg.com/modern-typedarray@0.0.1/index.js';
+import * as ModernTypedArray from 'https://unpkg.com/modern-typedarray@latest/index.js';
 
 console.log(ModernTypedArray);
 </script>
