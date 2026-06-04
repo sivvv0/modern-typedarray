@@ -5,6 +5,8 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org)
 [![ES2024](https://img.shields.io/badge/ES2024-%E2%9C%94-blue.svg)](https://tc39.es)
 
+<img src="https://i.postimg.cc/sfpQ2nYW/IMG-8475.jpg" width="500" alt="Project Preview">
+
 **The most advanced TypedArray polyfill with ES2024+ features, WASM SIMD, streaming, compression, cryptography, and GPU interop.**
 
 ## ✨ Features
