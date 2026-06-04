@@ -42,6 +42,25 @@ CDN (Browser)
 </script>
 ```
 
+* Browsers cannot directly import CommonJS modules
+* You would see errors like:
+```js
+exports is not defined
+module is not defined
+require is not defined
+```
+**Check quickly**
+
+- Open Safari/Chrome DevTools and see the exact error.
+- 
+```html
+<script type="module">
+import * as ModernTypedArray from 'https://unpkg.com/modern-typedarray@0.0.1/index.js';
+
+console.log(ModernTypedArray);
+</script>
+```
+
 Requirements
 
 · Node.js 16+ or modern browser (Chrome 80+, Firefox 75+, Safari 13+)
